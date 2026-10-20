@@ -1,0 +1,36 @@
+@import "tailwindcss" source("../");
+
+@theme {
+  --font-display: "Georgia", "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  background-color: #ffffff;
+  color: #0a0a0a;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.article-content p {
+  margin-bottom: 1.25em;
+  line-height: 1.8;
+}
+
+.article-content h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
