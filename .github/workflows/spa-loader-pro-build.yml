@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         env:
-          SPA_LOADER_WORKFLOW_VERSION: "4"
+          SPA_LOADER_WORKFLOW_VERSION: "5"
           CI: "true"
           HUSKY: "0"
         run: |
