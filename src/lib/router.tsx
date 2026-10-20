@@ -15,19 +15,35 @@ type RouterState = {
 }
 
 const RouterContext = createContext<RouterState | null>(null)
+const BASE_PATH = import.meta.env.BASE_URL.startsWith("/")
+  ? import.meta.env.BASE_URL.replace(/\/+$/, "")
+  : ""
+
+function getAppPath(pathname: string) {
+  if (!BASE_PATH) return pathname
+  if (pathname === BASE_PATH || pathname === `${BASE_PATH}/`) return "/"
+  if (pathname.startsWith(`${BASE_PATH}/`)) return pathname.slice(BASE_PATH.length)
+  return pathname
+}
+
+function getBaseHref(to: string) {
+  if (!BASE_PATH || !to.startsWith("/") || to.startsWith("//")) return to
+  return `${BASE_PATH}${to === "/" ? "/" : to}`
+}
 
 export function BrowserRouter({ children }: { children: ReactNode }) {
-  const [pathname, setPathname] = useState(() => window.location.pathname)
+  const [pathname, setPathname] = useState(() => getAppPath(window.location.pathname))
 
   useEffect(() => {
-    const updatePathname = () => setPathname(window.location.pathname)
+    const updatePathname = () => setPathname(getAppPath(window.location.pathname))
     window.addEventListener("popstate", updatePathname)
     return () => window.removeEventListener("popstate", updatePathname)
   }, [])
 
   const navigate = useCallback((to: string) => {
-    window.history.pushState(null, "", to)
-    setPathname(window.location.pathname)
+    const href = getBaseHref(to)
+    window.history.pushState(null, "", href)
+    setPathname(getAppPath(window.location.pathname))
     window.scrollTo({ top: 0, behavior: "instant" })
   }, [])
 
@@ -54,6 +70,7 @@ type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & { to: string }
 
 export function Link({ to, onClick, target, ...props }: LinkProps) {
   const { navigate } = useRouter()
+  const href = getBaseHref(to)
 
   function handleClick(event: MouseEvent<HTMLAnchorElement>) {
     onClick?.(event)
@@ -69,12 +86,12 @@ export function Link({ to, onClick, target, ...props }: LinkProps) {
       return
     }
 
-    const destination = new URL(to, window.location.href)
+    const destination = new URL(href, window.location.href)
     if (destination.origin !== window.location.origin) return
 
     event.preventDefault()
-    navigate(`${destination.pathname}${destination.search}${destination.hash}`)
+    navigate(`${getAppPath(destination.pathname)}${destination.search}${destination.hash}`)
   }
 
-  return <a {...props} href={to} target={target} onClick={handleClick} />
+  return <a {...props} href={href} target={target} onClick={handleClick} />
 }

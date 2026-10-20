@@ -10,7 +10,7 @@ on:
       base_path:
         description: Public base path, e.g. /app/my-spa/
         required: false
-        default: /
+        default: /app/legend-infos/
   repository_dispatch:
     types: [spa-loader-pro-build]
   push:
@@ -62,10 +62,10 @@ jobs:
         env:
           CI: "true"
           NODE_ENV: production
-          SPA_LOADER_BASE_PATH: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/' }}
-          VITE_BASE_PATH: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/' }}
-          BASE_URL: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/' }}
-          PUBLIC_URL: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/' }}
+          SPA_LOADER_BASE_PATH: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/app/legend-infos/' }}
+          VITE_BASE_PATH: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/app/legend-infos/' }}
+          BASE_URL: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/app/legend-infos/' }}
+          PUBLIC_URL: ${{ github.event.inputs.base_path || github.event.client_payload.base_path || '/app/legend-infos/' }}
         run: |
           case "${{ steps.pm.outputs.pm }}" in
             bun) bun run build ;;

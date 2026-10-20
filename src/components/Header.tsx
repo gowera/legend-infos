@@ -4,6 +4,8 @@ import { Menu, X } from "lucide-react"
 import { CATEGORIES } from "@/lib/categories"
 import { Link } from "@/lib/router"
 
+const LOGO_IMAGE = `${import.meta.env.BASE_URL}legend-logo.jpeg`
+
 export default function Header() {
   const [open, setOpen] = useState(false)
 
@@ -15,7 +17,7 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3">
-            <img src="/legend-logo.jpeg" alt="Logo LEGEND" className="h-11 w-11 rounded-full bg-white object-contain p-1" />
+            <img src={LOGO_IMAGE} alt="Logo LEGEND" className="h-11 w-11 rounded-full bg-white object-contain p-1" />
             <span className="font-display text-2xl font-bold tracking-tight">
               LEGEND
             </span>

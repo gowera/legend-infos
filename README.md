@@ -51,6 +51,8 @@ pnpm build
 
 Le site statique est généré dans `dist/`. Téléversez le contenu de ce dossier à la racine de l'hébergement. Le fichier `public/.htaccess` est copié dans `dist/` et redirige les routes de la SPA vers `index.html` sur les hébergements Apache. `netlify.toml` contient la règle équivalente pour Netlify.
 
+Spa Loader Pro transmet le chemin de déploiement via `SPA_LOADER_BASE_PATH`. Vite intègre ce chemin dans les URL du HTML et des assets ; le routeur et les images publiques utilisent le même préfixe. Pour un build manuel dans un sous-dossier, définissez par exemple `SPA_LOADER_BASE_PATH=/app/legend-infos/` avant `pnpm build`.
+
 ## Migration des anciens articles Netlify
 
 Le dépôt Git contient le code et les images de base, mais pas les articles publiés ni les photos enregistrées dans Netlify Database/Blobs. Leur import WordPress nécessite un export des données et des médias depuis l'ancien site Netlify. Aucun identifiant ou export de ces services n'est inclus dans ce dépôt.

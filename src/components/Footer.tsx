@@ -15,13 +15,15 @@ const VALUES = [
   "Engagement citoyen",
 ]
 
+const LOGO_IMAGE = `${import.meta.env.BASE_URL}legend-logo.jpeg`
+
 export default function Footer() {
   return (
     <footer className="bg-black text-white mt-24">
       <div className="max-w-6xl mx-auto px-4 py-14 grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <img src="/legend-logo.jpeg" alt="Logo LEGEND" className="h-9 w-9 rounded-full bg-white object-contain p-1" />
+            <img src={LOGO_IMAGE} alt="Logo LEGEND" className="h-9 w-9 rounded-full bg-white object-contain p-1" />
             <span className="font-display text-xl font-bold">LEGEND</span>
           </div>
           <p className="text-white/70 text-sm leading-relaxed">
