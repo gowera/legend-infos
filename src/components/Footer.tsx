@@ -1,11 +1,10 @@
-import { Link } from "@tanstack/react-router"
-
 import { CATEGORIES } from "@/lib/categories"
 import {
   CONTACT_PHONE_DISPLAY,
   CONTACT_PHONE_HREF,
   CONTACT_WHATSAPP_HREF,
 } from "@/lib/contact"
+import { Link } from "@/lib/router"
 
 const VALUES = [
   "Vérité",
@@ -22,11 +21,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 py-14 grid gap-10 md:grid-cols-3">
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <img
-              src="/.netlify/images?url=/legend-logo.jpeg&w=64&h=64&fit=cover&fm=webp"
-              alt="Logo LEGEND"
-              className="h-9 w-9 rounded-full bg-white object-contain p-1"
-            />
+            <img src="/legend-logo.jpeg" alt="Logo LEGEND" className="h-9 w-9 rounded-full bg-white object-contain p-1" />
             <span className="font-display text-xl font-bold">LEGEND</span>
           </div>
           <p className="text-white/70 text-sm leading-relaxed">
@@ -43,8 +38,7 @@ export default function Footer() {
             {CATEGORIES.map((cat) => (
               <li key={cat.slug}>
                 <Link
-                  to="/categorie/$category"
-                  params={{ category: cat.slug }}
+                  to={`/categorie/${cat.slug}`}
                   className="text-white/80 hover:text-white"
                 >
                   {cat.label}

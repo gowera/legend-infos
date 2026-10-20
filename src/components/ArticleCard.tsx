@@ -1,13 +1,8 @@
-import { Link } from "@tanstack/react-router"
-
 import { getCategoryLabel } from "@/lib/categories"
 import { microImageUrl } from "@/lib/media"
-import type { Article } from "@/lib/types"
-
-function imageUrl(imageKey: string | null, width: number) {
-  if (!imageKey) return microImageUrl(width)
-  return `/.netlify/images?url=/api/images/${imageKey}&w=${width}&fit=cover&fm=webp`
-}
+import type { Article } from "@/lib/wordpress"
+import { Link } from "@/lib/router"
+import FallbackImage from "@/components/FallbackImage"
 
 function formatDate(date: Date | string) {
   return new Date(date).toLocaleDateString("fr-FR", {
@@ -24,12 +19,11 @@ export default function ArticleCard({
   article: Article
   featured?: boolean
 }) {
-  const src = imageUrl(article.imageKey, featured ? 900 : 500)
+  const src = article.imageUrl ?? microImageUrl()
 
   return (
     <Link
-      to="/articles/$slug"
-      params={{ slug: article.slug }}
+      to={`/articles/${encodeURIComponent(article.slug)}`}
       className="group block"
     >
       <article className="flex flex-col h-full">
@@ -38,9 +32,10 @@ export default function ArticleCard({
             featured ? "aspect-[16/9]" : "aspect-[4/3]"
           }`}
         >
-          <img
+          <FallbackImage
             src={src}
             alt={article.title}
+            fallbackSrc={microImageUrl()}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>

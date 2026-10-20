@@ -1,23 +1,18 @@
-import { createFileRoute, notFound } from "@tanstack/react-router"
-
-import { listArticles } from "@/lib/articles.functions"
 import { CATEGORIES, isValidCategory, getCategoryLabel } from "@/lib/categories"
+import { useArticles } from "@/lib/useArticles"
 import ArticleCard from "@/components/ArticleCard"
 
-export const Route = createFileRoute("/categorie/$category")({
-  loader: async ({ params }) => {
-    if (!isValidCategory(params.category)) {
-      throw notFound()
-    }
-    const articles = await listArticles({ data: { category: params.category } })
-    return { category: params.category, articles }
-  },
-  component: CategoryPage,
-})
-
-function CategoryPage() {
-  const { category, articles } = Route.useLoaderData()
+export default function CategoryPage({ slug: category }: { slug: string }) {
+  const { articles, loading, error } = useArticles(category)
   const info = CATEGORIES.find((c) => c.slug === category)
+
+  if (!isValidCategory(category)) {
+    return (
+      <section className="max-w-3xl mx-auto px-4 py-20 text-center">
+        <h1 className="font-display text-3xl font-bold">Rubrique introuvable</h1>
+      </section>
+    )
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-16">
@@ -30,7 +25,13 @@ function CategoryPage() {
         )}
       </header>
 
-      {articles.length === 0 ? (
+      {loading ? (
+        <p role="status" className="text-black/60">Chargement des articles…</p>
+      ) : error ? (
+        <p role="alert" className="border border-red-300 bg-red-50 p-5 text-red-900">
+          Impossible de charger les articles : {error}
+        </p>
+      ) : articles.length === 0 ? (
         <p className="text-black/60">
           Aucun article n'a encore été publié dans cette rubrique.
         </p>

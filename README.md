@@ -1,54 +1,56 @@
 # LEGEND
 
-LEGEND est un média d'information en ligne dédié à l'actualité, à l'investigation, au débat public et à la promotion de l'action citoyenne. Ce dépôt contient le site public ainsi qu'un espace de publication permettant à la rédaction de mettre en ligne de nouveaux articles avec leur photo.
+LEGEND est un média d'information en ligne dédié à l'actualité, à l'investigation, au débat public et à l'action citoyenne.
 
 ## Fonctionnalités
 
-- Page d'accueil avec les derniers articles et présentation de la ligne éditoriale (Investigations, Débats et émissions, Action citoyenne).
-- Pages par rubrique et page de détail pour chaque article.
-- Page "À propos" reprenant la mission, les valeurs et l'engagement de LEGEND.
-- Espace de publication (`/publier`) : formulaire pour créer un article (titre, résumé, contenu, rubrique, auteur, photo), réservé au propriétaire du site (connexion Netlify Identity).
-- Les articles et leurs photos sont stockés de façon persistante (base de données + stockage d'images Netlify), donc visibles immédiatement par tous les visiteurs après publication.
-
-## Technologies
-
-- [TanStack Start](https://tanstack.com/start) (React 19 + TanStack Router) avec Vite
-- Tailwind CSS 4
-- Netlify Database (Postgres géré) via Drizzle ORM, pour stocker les articles
-- Netlify Blobs, pour stocker les photos des articles
-- Netlify Identity, pour réserver la publication au propriétaire
-- Netlify Image CDN, pour l'optimisation des images affichées sur le site
+- SPA React/Vite avec navigation côté client.
+- Accueil, rubriques, pages d'articles et page « À propos ».
+- Lecture des articles publiés et de leurs images via l'API REST publique de WordPress.
+- Partage des articles par WhatsApp et Facebook.
+- Publication gérée depuis l'administration WordPress ; le site public reste en lecture seule.
 
 ## Développement local
 
+Prérequis : Node.js et pnpm.
+
 ```bash
 pnpm install
+```
+
+Copiez `.env.example` vers `.env.local` si vous souhaitez remplacer la configuration locale. `VITE_WORDPRESS_URL` contient l'adresse du site WordPress. La production est configurée pour `https://legend-infos.com`.
+
+L'API est appelée avec le paramètre WordPress standard `?rest_route=/wp/v2/posts`, car la route `/wp-json/` renvoie actuellement une erreur 500 sur cet hébergement.
+
+```bash
 pnpm dev
 ```
 
-Le serveur de développement démarre sur `http://localhost:3000`. Pour bénéficier de l'émulation complète des fonctionnalités Netlify (base de données, stockage d'images), utilisez plutôt :
+Ouvrez `http://localhost:3000`. Pour vérifier la version de production :
 
 ```bash
-netlify dev
+pnpm build
+pnpm preview
 ```
 
-## Espace de publication
+## Configuration WordPress
 
-Seul le propriétaire du site peut publier. La page `/publier` demande de se connecter avec un compte Netlify Identity, et le serveur vérifie que ce compte possède le rôle `owner` avant d'enregistrer un article. Le bouton « Publier » de l'en-tête n'apparaît que pour le propriétaire connecté.
+- L'API REST WordPress doit être activée et permettre la lecture publique des articles.
+- Les articles doivent être publiés dans la taxonomie WordPress « Catégories » avec les slugs `actualite`, `investigations`, `debats-emissions` ou `action-citoyenne`.
+- L'image mise en avant de l'article est utilisée comme visuel. Sans image, le site affiche `public/micro.jpg`.
+- Si la SPA est hébergée sur un autre domaine que `legend-infos.com`, configurez CORS dans WordPress pour autoriser l'origine exacte du site LEGEND. Sans cet en-tête, les navigateurs bloquent les requêtes. L'API répond actuellement sans en-tête CORS ; un hébergement de la SPA sur `legend-infos.com` évite cette restriction en production.
+- Aucun identifiant WordPress ni mot de passe ne doit être placé dans les variables `VITE_*` : ces valeurs sont intégrées au code public.
 
-Pour créer le compte propriétaire (une seule fois) :
+La route `/publier` indique que la publication se fait dans WordPress. Les rédacteurs publient et gèrent les articles depuis l'administration WordPress, pas depuis la SPA.
 
-1. Dans le tableau de bord Netlify, ouvrez **Identity** et cliquez sur **Invite users** ; saisissez votre email.
-2. Ouvrez le lien reçu par email : il mène à l'espace de publication, où vous choisissez votre mot de passe.
-3. De retour dans **Identity**, cliquez sur votre compte et ajoutez le rôle `owner` dans le champ **Roles**, puis enregistrez.
-4. Recommandé : dans **Project configuration > Identity**, passez l'inscription en **Invite only** pour que personne d'autre ne puisse créer de compte.
+## Hébergement
 
-Les rôles ne peuvent être attribués que depuis le tableau de bord Netlify : un visiteur qui créerait un compte ne pourrait donc pas publier.
+```bash
+pnpm build
+```
 
-## Photo du micro
+Le site statique est généré dans `dist/`. Téléversez le contenu de ce dossier à la racine de l'hébergement. Le fichier `public/.htaccess` est copié dans `dist/` et redirige les routes de la SPA vers `index.html` sur les hébergements Apache. `netlify.toml` contient la règle équivalente pour Netlify.
 
-La photo `public/micro.jpg` (libre de droits, Unsplash) sert de fond à la bannière d'accueil et d'image par défaut pour les articles publiés sans photo.
+## Migration des anciens articles Netlify
 
-## Structure du projet
-
-Voir `AGENTS.md` pour le détail de l'architecture et des conventions du code.
+Le dépôt Git contient le code et les images de base, mais pas les articles publiés ni les photos enregistrées dans Netlify Database/Blobs. Leur import WordPress nécessite un export des données et des médias depuis l'ancien site Netlify. Aucun identifiant ou export de ces services n'est inclus dans ce dépôt.

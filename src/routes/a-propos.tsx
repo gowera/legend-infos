@@ -1,15 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
-
 import { CATEGORIES } from "@/lib/categories"
 import {
   CONTACT_PHONE_DISPLAY,
   CONTACT_PHONE_HREF,
   CONTACT_WHATSAPP_HREF,
 } from "@/lib/contact"
-
-export const Route = createFileRoute("/a-propos")({
-  component: About,
-})
 
 const VALUES = [
   "Vérité",
@@ -20,7 +14,7 @@ const VALUES = [
   "Engagement citoyen",
 ]
 
-function About() {
+export default function About() {
   return (
     <div>
       <section className="bg-black text-white">

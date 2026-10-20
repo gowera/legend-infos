@@ -1,61 +1,40 @@
-import { createFileRoute, notFound } from "@tanstack/react-router"
+import { useEffect } from "react"
 
 import ShareButtons from "@/components/ShareButtons"
-import { getArticleBySlug, getSiteOrigin } from "@/lib/articles.functions"
+import FallbackImage from "@/components/FallbackImage"
 import { getCategoryLabel } from "@/lib/categories"
-import { MICRO_IMAGE, microImageUrl } from "@/lib/media"
+import { microImageUrl } from "@/lib/media"
+import { useArticle } from "@/lib/useArticles"
 
-export const Route = createFileRoute("/articles/$slug")({
-  loader: async ({ params }) => {
-    const [article, origin] = await Promise.all([
-      getArticleBySlug({ data: { slug: params.slug } }),
-      getSiteOrigin(),
-    ])
-    if (!article) {
-      throw notFound()
-    }
-    return { article, origin }
-  },
-  head: ({ loaderData }) => {
-    if (!loaderData) return {}
-    const { article, origin } = loaderData
-    // Photo de l'article (ou photo de micro par défaut) mise en avant lors du partage.
-    // JPEG 1200×630 : format recommandé par Facebook/WhatsApp pour les aperçus.
-    const imagePath = article.imageKey ? `/api/images/${article.imageKey}` : MICRO_IMAGE
-    const shareImage = `${origin}/.netlify/images?url=${imagePath}&w=1200&h=630&fit=cover&fm=jpg`
-    const url = `${origin}/articles/${article.slug}`
-    const title = `${article.title} — LEGEND`
-    return {
-      meta: [
-        { title },
-        { name: "description", content: article.excerpt },
-        { property: "og:title", content: article.title },
-        { property: "og:description", content: article.excerpt },
-        { property: "og:type", content: "article" },
-        { property: "og:url", content: url },
-        { property: "og:site_name", content: "LEGEND" },
-        { property: "og:image", content: shareImage },
-        { property: "og:image:width", content: "1200" },
-        { property: "og:image:height", content: "630" },
-        { property: "og:image:alt", content: article.title },
-        { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: article.title },
-        { name: "twitter:description", content: article.excerpt },
-        { name: "twitter:image", content: shareImage },
-      ],
-      links: [{ rel: "canonical", href: url }],
-    }
-  },
-  component: ArticlePage,
-})
+export default function ArticlePage({ slug }: { slug: string }) {
+  const { article, loading, error } = useArticle(slug)
 
-function ArticlePage() {
-  const { article } = Route.useLoaderData()
-  const imageSrc = article.imageKey
-    ? `/.netlify/images?url=/api/images/${article.imageKey}&w=1200&fm=webp`
-    : microImageUrl(1200)
+  useEffect(() => {
+    if (!article) return
+    document.title = `${article.title} — LEGEND`
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]')
+    if (description) description.content = article.excerpt
+  }, [article])
 
-  const paragraphs = article.content.split(/\n+/).filter((p) => p.trim().length > 0)
+  if (loading) {
+    return <p role="status" className="max-w-3xl mx-auto px-4 py-16">Chargement de l'article…</p>
+  }
+  if (error) {
+    return (
+      <p role="alert" className="max-w-3xl mx-auto px-4 py-16 text-red-900">
+        Impossible de charger l'article : {error}
+      </p>
+    )
+  }
+  if (!article) {
+    return (
+      <section className="max-w-3xl mx-auto px-4 py-20 text-center">
+        <h1 className="font-display text-3xl font-bold">Article introuvable</h1>
+      </section>
+    )
+  }
+
+  const imageSrc = article.imageUrl ?? microImageUrl()
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-16">
@@ -74,9 +53,10 @@ function ArticlePage() {
         })}
       </p>
 
-      <img
+      <FallbackImage
         src={imageSrc}
         alt={article.title}
+        fallbackSrc={microImageUrl()}
         className="w-full aspect-[16/9] object-cover mt-8 border border-black/10"
       />
 
@@ -84,11 +64,7 @@ function ArticlePage() {
         {article.excerpt}
       </p>
 
-      <div className="article-content mt-8 text-black/85">
-        {paragraphs.map((p, i) => (
-          <p key={i}>{p}</p>
-        ))}
-      </div>
+      <div className="article-content mt-8 text-black/85" dangerouslySetInnerHTML={{ __html: article.content }} />
 
       <ShareButtons title={article.title} path={`/articles/${article.slug}`} />
     </article>

@@ -1,24 +1,19 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
-
-import { listArticles } from "@/lib/articles.functions"
 import { CATEGORIES } from "@/lib/categories"
+import { Link } from "@/lib/router"
+import { useArticles } from "@/lib/useArticles"
 import ArticleCard from "@/components/ArticleCard"
+import FallbackImage from "@/components/FallbackImage"
 import { microImageUrl } from "@/lib/media"
 
-export const Route = createFileRoute("/")({
-  loader: () => listArticles({ data: {} }),
-  component: Home,
-})
-
-function Home() {
-  const articles = Route.useLoaderData()
+export default function Home() {
+  const { articles, loading, error } = useArticles()
   const [featured, ...rest] = articles
 
   return (
     <div>
       <section className="relative bg-black text-white overflow-hidden">
-        <img
-          src={microImageUrl(1920, 900)}
+        <FallbackImage
+          src={microImageUrl()}
           alt=""
           aria-hidden="true"
           className="absolute inset-0 w-full h-full object-cover object-[center_70%] grayscale opacity-50"
@@ -43,7 +38,15 @@ function Home() {
       </section>
 
       <section className="max-w-6xl mx-auto px-4 py-16">
-        {articles.length === 0 ? (
+        {loading ? (
+          <p role="status" className="py-16 text-center text-black/60">
+            Chargement des articles…
+          </p>
+        ) : error ? (
+          <p role="alert" className="border border-red-300 bg-red-50 p-5 text-red-900">
+            Impossible de charger les articles : {error}
+          </p>
+        ) : articles.length === 0 ? (
           <div className="border border-black/10 py-20 text-center">
             <p className="font-display text-2xl mb-2">Aucun article publié pour le moment</p>
             <p className="text-black/60">
@@ -84,8 +87,7 @@ function Home() {
             {CATEGORIES.filter((c) => c.slug !== "actualite").map((cat) => (
               <Link
                 key={cat.slug}
-                to="/categorie/$category"
-                params={{ category: cat.slug }}
+                to={`/categorie/${cat.slug}`}
                 className="block border border-black/15 p-8 hover:border-black transition-colors"
               >
                 <h3 className="font-display text-xl font-bold mb-3">{cat.label}</h3>
